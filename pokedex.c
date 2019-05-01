@@ -300,7 +300,7 @@ void change_current_pokemon(Pokedex pokedex, int destination_pokemon_id) {
 void remove_pokemon(Pokedex pokedex) {
 
     struct pokenode *curr = pokedex->head;
-    
+    int evolution_to_find = -1;
     struct pokenode *destination = NULL;
     
     while(curr != NULL){
@@ -308,6 +308,7 @@ void remove_pokemon(Pokedex pokedex) {
         if(curr->current != TRUE){
             destination = curr;
             curr = curr->next;
+            evolution_to_find = pokemon_id(curr->pokemon);
         }
         else{
             break;
@@ -336,6 +337,16 @@ void remove_pokemon(Pokedex pokedex) {
     // otherwise if only one pokenode, set head now equal to NULL
     else{
         pokedex->head = NULL;
+    }
+    
+    destination = pokedex->head;
+    // loop to reset any pokemon value which evolves into the pokemon we are removing
+    while(destination != NULL && evolution_to_find != -1){
+        if (destination->evolution == evolution_to_find){
+            destination->evolution = -1;
+            break;
+        }  
+        destination = destination->next;
     }
     // free pokemon struct
     destroy_pokemon(curr->pokemon);
@@ -539,7 +550,7 @@ void show_evolutions(Pokedex pokedex) {
     
     curr = pokedex->head;
     // loops through while there is an evolution id which we wish to find
-    while(evolution_to_find != -1){
+    while(evolution_to_find != -1 && curr != NULL){
         // prints an arrow to indicate there is an evolution
         printf(" --> ");
         while(curr != NULL){
